@@ -27,11 +27,6 @@
     .nombre-input {
       margin-top: 5px;
     }
-    @media (max-width: 576px) {
-      .puesto {
-        margin: 5px 0;
-      }
-    }
   </style>
   <title>Rifa</title>
 </head>
@@ -39,10 +34,8 @@
 
   <div class="container">
     <h1 class="text-center">Rifa - 100 Puestos</h1>
-    <div class="row">
-      <div class="col-md-12" id="puestosContainer">
-        <!-- Puestos se generarán aquí con JavaScript -->
-      </div>
+    <div class="row" id="puestosContainer">
+      <!-- Puestos se generarán aquí con JavaScript -->
     </div>
   </div>
 
@@ -75,7 +68,7 @@
 
     for (var i = 1; i <= 100; i++) {
       var puestoDiv = document.createElement('div');
-      puestoDiv.className = 'col-md-3 col-sm-6 puesto';
+      puestoDiv.className = 'col-md-3 puesto';
       puestoDiv.id = 'puesto' + i;
       puestoDiv.innerHTML = '<p>Puesto ' + i + '</p><p class="estado" id="estado' + i + '">Disponible</p><input type="text" class="form-control nombre-input" id="nombre' + i + '" placeholder="Nombre" style="display:none;"><button class="btn btn-primary btn-sm" id="guardar' + i + '" style="display:none;">Guardar</button><button class="btn btn-danger btn-sm" id="cancelar' + i + '" style="display:none;">Cancelar</button>';
       puestoDiv.onclick = function () {
