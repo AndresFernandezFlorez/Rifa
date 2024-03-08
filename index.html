@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .puesto {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .puesto:hover {
+      background-color: #f8f9fa;
+    }
+    .ocupado {
+      background-color: #ffcccc;
+    }
+    .nombre-input {
+      margin-top: 5px;
+    }
+  </style>
+  <title>Rifa</title>
+</head>
+<body>
+
+  <div class="container">
+    <h1 class="text-center">Rifa - 100 Puestos</h1>
+    <div class="row" id="puestosContainer">
+      <!-- Puestos se generarán aquí con JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    // URL del archivo JSON en GitHub
+    var jsonUrl = 'https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/puestos.json';
+
+    // Generar los 100 puestos con JavaScript
+    var puestosContainer = document.getElementById('puestosContainer');
+
+    // Cargar datos desde el archivo JSON en GitHub
+    fetch(jsonUrl)
+      .then(response => response.json())
+      .then(data => {
+        for (var i = 1; i <= 100; i++) {
+          var nombreGuardado = data['nombre' + i];
+          if (nombreGuardado) {
+            document.getElementById('nombre' + i).value = nombreGuardado;
+            ocuparPuesto(i);
+          }
+        }
+      });
+
+    for (var i = 1; i <= 100; i++) {
+      var puestoDiv = document.createElement('div');
+      puestoDiv.className = 'col-md-3 puesto';
+      puestoDiv.id = 'puesto' + i;
+      puestoDiv.innerHTML = '<p>Puesto ' + i + '</p><p class="estado" id="estado' + i + '">Disponible</p><input type="text" class="form-control nombre-input" id="nombre' + i + '" placeholder="Nombre" style="display:none;"><button class="btn btn-primary btn-sm" id="guardar' + i + '" style="display:none;">Guardar</button><button class="btn btn-danger btn-sm" id="cancelar' + i + '" style="display:none;">Cancelar</button>';
+      puestoDiv.onclick = function () {
+        tomarPuesto(this.id);
+      };
+      puestosContainer.appendChild(puestoDiv);
+    }
+
+    function tomarPuesto(id) {
+      var puestoId = parseInt(id.replace('puesto', ''));
+      var nombreInput = document.getElementById('nombre' + puestoId);
+      var estadoPuesto = document.getElementById('estado' + puestoId);
+      var guardarBtn = document.getElementById('guardar' + puestoId);
+      var cancelarBtn = document.getElementById('cancelar' + puestoId);
+
+      if (nombreInput.style.display === 'none') {
+        // El puesto está disponible, permitir ingresar nombre
+        nombreInput.style.display = 'block';
+        guardarBtn.style.display = 'block';
+        cancelarBtn.style.display = 'block';
+        estadoPuesto.textContent = 'Ocupado';
+        estadoPuesto.classList.add('ocupado');
+        nombreInput.focus(); // Coloca automáticamente el foco en el campo de nombre
+      } else {
+        // El puesto está ocupado, guardar nombre y liberar
+        guardarDatos(puestoId, nombreInput.value);
+        ocuparPuesto(puestoId);
+      }
+
+      // Habilitar el botón de guardar solo si hay un cambio en el nombre
+      nombreInput.addEventListener('input', function () {
+        guardarBtn.disabled = (nombreInput.value.trim() === '');
+      });
+
+      // Al hacer clic en el botón de guardar
+      guardarBtn.onclick = function () {
+        guardarDatos(puestoId, nombreInput.value);
+        ocuparPuesto(puestoId);
+      };
+
+      // Al hacer clic en el botón de cancelar
+      cancelarBtn.onclick = function () {
+        nombreInput.value = '';
+        guardarDatos(puestoId, '');
+        ocuparPuesto(puestoId);
+      };
+    }
+
+    function ocuparPuesto(puestoId) {
+      var nombreInput = document.getElementById('nombre' + puestoId);
+      var estadoPuesto = document.getElementById('estado' + puestoId);
+      var guardarBtn = document.getElementById('guardar' + puestoId);
+      var cancelarBtn = document.getElementById('cancelar' + puestoId);
+
+      // Verificar si el nombre está presente
+      if (nombreInput.value.trim() !== '') {
+        estadoPuesto.textContent = 'Ocupado';
+        estadoPuesto.classList.add('ocupado');
+        nombreInput.setAttribute('readonly', true);
+        guardarBtn.style.display = 'none'; // Ocultar el botón de guardar después de la ocupación
+        cancelarBtn.style.display = 'none'; // Ocultar el botón de cancelar después de la ocupación
+      } else {
+        // Si no hay nombre, el puesto se marca como disponible
+        estadoPuesto.textContent = 'Disponible';
+        estadoPuesto.classList.remove('ocupado');
+        guardarBtn.style.display = 'none'; // Ocultar el botón de guardar si está disponible
+        cancelarBtn.style.display = 'none'; // Ocultar el botón de cancelar si está disponible
+      }
+    }
+
+    function guardarDatos(puestoId, nombre) {
+      // Cargar datos actuales desde GitHub
+      fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+          // Actualizar los datos
+          data['nombre' + puestoId] = nombre;
+
+          // Guardar los datos actualizados en GitHub
+          fetch(jsonUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          });
+        });
+    }
+  </script>
+
+</body>
+</html>
