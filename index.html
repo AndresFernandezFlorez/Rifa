@@ -40,6 +40,7 @@
   </div>
 
   <script>
+    // Configuración de Firebase
     var firebaseConfig = {
       apiKey: "tu-api-key",
       authDomain: "tu-auth-domain",
@@ -49,9 +50,8 @@
       appId: "tu-app-id"
     };
 
-    // Inicializar Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    // Inicialización de Firebase
+    firebase.initializeApp(firebaseConfig);
 
     var puestosContainer = document.getElementById('puestosContainer');
 
