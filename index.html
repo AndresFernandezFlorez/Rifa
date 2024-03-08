@@ -1,143 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
-  <style>
-    body {
-      padding: 20px;
-    }
-    .puesto {
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin: 5px;
-      text-align: center;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .puesto:hover {
-      background-color: #f8f9fa;
-    }
-    .ocupado {
-      background-color: #ffcccc;
-    }
-    .nombre-input {
-      margin-top: 5px;
-    }
-  </style>
-  <title>Rifa</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .puesto {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .puesto:hover {
+            background-color: #f8f9fa;
+        }
+
+        .ocupado {
+            background-color: #ffcccc;
+        }
+
+        .nombre-input {
+            margin-top: 5px;
+        }
+
+        .btn {
+            margin-top: 5px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+    </style>
+    <title>Rifa</title>
 </head>
+
 <body>
 
-  <div class="container">
-    <h1 class="text-center">Rifa - 100 Puestos</h1>
-    <div class="row" id="puestosContainer">
-      <!-- Puestos se generarán aquí con JavaScript -->
+    <div class="container">
+        <h1>Rifa - 100 Puestos</h1>
+        <p class="text-center">Por favor, realiza las consignaciones a 8319753104 Ahorros Bancolombia</p>
+        <div class="row justify-content-center" id="puestosContainer">
+            <!-- Puestos se generarán aquí con JavaScript -->
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Configuración de Firebase
-    var firebaseConfig = {
-      apiKey: "tu-api-key",
-      authDomain: "tu-auth-domain",
-      projectId: "tu-project-id",
-      storageBucket: "tu-storage-bucket",
-      messagingSenderId: "tu-messaging-sender-id",
-      appId: "tu-app-id"
-    };
+    <script>
+        // Generar los 100 puestos con JavaScript
+        var puestosContainer = document.getElementById('puestosContainer');
 
-    // Inicialización de Firebase
-    firebase.initializeApp(firebaseConfig);
-
-    var puestosContainer = document.getElementById('puestosContainer');
-
-    window.onload = function () {
-      for (var i = 1; i <= 100; i++) {
-        firebase.database().ref('puestos/' + i).once('value').then(function (snapshot) {
-          var nombreGuardado = snapshot.val() ? snapshot.val().nombre : null;
-          if (nombreGuardado) {
-            document.getElementById('nombre' + i).value = nombreGuardado;
-            ocuparPuesto(i);
-          }
-        });
-      }
-    };
-
-    for (var i = 1; i <= 100; i++) {
-      var puestoDiv = document.createElement('div');
-      puestoDiv.className = 'col-md-3 puesto';
-      puestoDiv.id = 'puesto' + i;
-      puestoDiv.innerHTML = '<p>Puesto ' + i + '</p><p class="estado" id="estado' + i + '">Disponible</p><input type="text" class="form-control nombre-input" id="nombre' + i + '" placeholder="Nombre" style="display:none;"><button class="btn btn-primary btn-sm" id="guardar' + i + '" style="display:none;">Guardar</button><button class="btn btn-danger btn-sm" id="cancelar' + i + '" style="display:none;">Cancelar</button>';
-      puestoDiv.onclick = function () {
-        tomarPuesto(this.id);
-      };
-      puestosContainer.appendChild(puestoDiv);
-    }
-
-    function tomarPuesto(id) {
-      var puestoId = parseInt(id.replace('puesto', ''));
-      var nombreInput = document.getElementById('nombre' + puestoId);
-      var estadoPuesto = document.getElementById('estado' + puestoId);
-      var guardarBtn = document.getElementById('guardar' + puestoId);
-      var cancelarBtn = document.getElementById('cancelar' + puestoId);
-
-      if (nombreInput.style.display === 'none') {
-        nombreInput.style.display = 'block';
-        guardarBtn.style.display = 'block';
-        cancelarBtn.style.display = 'block';
-        estadoPuesto.textContent = 'Ocupado';
-        estadoPuesto.classList.add('ocupado');
-        nombreInput.focus();
-
-        guardarBtn.onclick = function () {
-          firebase.database().ref('puestos/' + puestoId).set({
-            nombre: nombreInput.value
-          });
-          ocuparPuesto(puestoId);
+        // Cargar datos desde localStorage al cargar la página
+        window.onload = function () {
+            for (var i = 1; i <= 100; i++) {
+                var nombreGuardado = localStorage.getItem('nombre' + i);
+                if (nombreGuardado) {
+                    document.getElementById('nombre' + i).value = nombreGuardado;
+                    ocuparPuesto(i);
+                }
+            }
         };
 
-        cancelarBtn.onclick = function () {
-          nombreInput.value = '';
-          firebase.database().ref('puestos/' + puestoId).remove();
-          ocuparPuesto(puestoId);
-        };
+        for (var i = 1; i <= 100; i++) {
+            var puestoDiv = document.createElement('div');
+            puestoDiv.className = 'col-md-3 puesto';
+            puestoDiv.id = 'puesto' + i;
+            puestoDiv.innerHTML = '<p>Puesto ' + i + '</p><p class="estado" id="estado' + i + '">Disponible</p><input type="text" class="form-control nombre-input" id="nombre' + i + '" placeholder="Nombre"><button class="btn btn-primary btn-sm" id="guardar' + i + '">Guardar</button><button class="btn btn-danger btn-sm" id="cancelar' + i + '">Cancelar</button>';
+            puestoDiv.onclick = function () {
+                tomarPuesto(this.id);
+            };
+            puestosContainer.appendChild(puestoDiv);
+        }
 
-      } else {
-        firebase.database().ref('puestos/' + puestoId).set({
-          nombre: nombreInput.value
-        });
-        ocuparPuesto(puestoId);
-      }
+        function tomarPuesto(id) {
+            var puestoId = parseInt(id.replace('puesto', ''));
+            var nombreInput = document.getElementById('nombre' + puestoId);
+            var estadoPuesto = document.getElementById('estado' + puestoId);
+            var guardarBtn = document.getElementById('guardar' + puestoId);
+            var cancelarBtn = document.getElementById('cancelar' + puestoId);
 
-      nombreInput.addEventListener('input', function () {
-        guardarBtn.disabled = (nombreInput.value.trim() === '');
-      });
-    }
+            if (nombreInput.style.display === 'none') {
+                // El puesto está disponible, permitir ingresar nombre
+                nombreInput.style.display = 'block';
+                guardarBtn.style.display = 'block';
+                cancelarBtn.style.display = 'block';
+                estadoPuesto.textContent = 'Ocupado';
+                estadoPuesto.classList.add('ocupado');
+                nombreInput.focus(); // Coloca automáticamente el foco en el campo de nombre
+            } else {
+                // El puesto está ocupado, guardar nombre y liberar
+                localStorage.setItem('nombre' + puestoId, nombreInput.value);
+                ocuparPuesto(puestoId);
+            }
 
-    function ocuparPuesto(puestoId) {
-      var nombreInput = document.getElementById('nombre' + puestoId);
-      var estadoPuesto = document.getElementById('estado' + puestoId);
-      var guardarBtn = document.getElementById('guardar' + puestoId);
-      var cancelarBtn = document.getElementById('cancelar' + puestoId);
+            // Habilitar el botón de guardar solo si hay un cambio en el nombre
+            nombreInput.addEventListener('input', function () {
+                guardarBtn.disabled = (nombreInput.value.trim() === '');
+            });
 
-      if (nombreInput.value.trim() !== '') {
-        estadoPuesto.textContent = 'Ocupado';
-        estadoPuesto.classList.add('ocupado');
-        nombreInput.setAttribute('readonly', true);
-        guardarBtn.style.display = 'none';
-        cancelarBtn.style.display = 'none';
-      } else {
-        estadoPuesto.textContent = 'Disponible';
-        estadoPuesto.classList.remove('ocupado');
-        guardarBtn.style.display = 'none';
-        cancelarBtn.style.display = 'none';
-      }
-    }
-  </script>
+            // Al hacer clic en el botón de guardar
+            guardarBtn.onclick = function () {
+                localStorage.setItem('nombre' + puestoId, nombreInput.value);
+                ocuparPuesto(puestoId);
+            };
+
+            // Al hacer clic en el botón de cancelar
+            cancelarBtn.onclick = function () {
+                nombreInput.value = '';
+                localStorage.removeItem('nombre' + puestoId);
+                ocuparPuesto(puestoId);
+            };
+        }
+
+        function ocuparPuesto(puestoId) {
+            var nombreInput = document.getElementById('nombre' + puestoId);
+            var estadoPuesto = document.getElementById('estado' + puestoId);
+            var guardarBtn = document.getElementById('guardar' + puestoId);
+            var cancelarBtn = document.getElementById('cancelar' + puestoId);
+
+            // Verificar si el nombre está presente
+            if (nombreInput.value.trim() !== '') {
+                estadoPuesto.textContent = 'Ocupado';
+                estadoPuesto.classList.add('ocupado');
+                nombreInput.setAttribute('readonly', true);
+                guardarBtn.style.display = 'none'; // Ocultar el botón de guardar después de la ocupación
+                cancelarBtn.style.display = 'none'; // Ocultar el botón de cancelar después de la ocupación
+            } else {
+                // Si no hay nombre, el puesto se marca como disponible
+                estadoPuesto.textContent = 'Disponible';
+                estadoPuesto.classList.remove('ocupado');
+                guardarBtn.style.display = 'block'; // Mostrar el botón de guardar si está disponible
+                cancelarBtn.style.display = 'block'; // Mostrar el botón de cancelar si está disponible
+            }
+        }
+    </script>
 
 </body>
+
 </html>
