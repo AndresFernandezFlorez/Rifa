@@ -50,7 +50,8 @@
     };
 
     // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
     var puestosContainer = document.getElementById('puestosContainer');
 
