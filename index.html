@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
   <style>
     body {
       padding: 20px;
@@ -38,17 +40,29 @@
   </div>
 
   <script>
-    // Generar los 100 puestos con JavaScript
+    var firebaseConfig = {
+      apiKey: "AIzaSyC2J11P7rk8NnWoh0HyRdo56QK2zZgnXyA",
+      authDomain: "rifa-3af3a.firebaseapp.com",
+      projectId: "rifa-3af3a",
+      storageBucket: "rifa-3af3a.appspot.com",
+      messagingSenderId: "828130234957",
+      appId: "1:828130234957:web:93904c2209f0f83fc70204"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+
     var puestosContainer = document.getElementById('puestosContainer');
-    
-    // Cargar datos desde localStorage al cargar la página
+
     window.onload = function () {
       for (var i = 1; i <= 100; i++) {
-        var nombreGuardado = localStorage.getItem('nombre' + i);
-        if (nombreGuardado) {
-          document.getElementById('nombre' + i).value = nombreGuardado;
-          ocuparPuesto(i);
-        }
+        firebase.database().ref('puestos/' + i).once('value').then(function (snapshot) {
+          var nombreGuardado = snapshot.val() ? snapshot.val().nombre : null;
+          if (nombreGuardado) {
+            document.getElementById('nombre' + i).value = nombreGuardado;
+            ocuparPuesto(i);
+          }
+        });
       }
     };
 
@@ -71,36 +85,36 @@
       var cancelarBtn = document.getElementById('cancelar' + puestoId);
 
       if (nombreInput.style.display === 'none') {
-        // El puesto está disponible, permitir ingresar nombre
         nombreInput.style.display = 'block';
         guardarBtn.style.display = 'block';
         cancelarBtn.style.display = 'block';
         estadoPuesto.textContent = 'Ocupado';
         estadoPuesto.classList.add('ocupado');
-        nombreInput.focus(); // Coloca automáticamente el foco en el campo de nombre
+        nombreInput.focus();
+
+        guardarBtn.onclick = function () {
+          firebase.database().ref('puestos/' + puestoId).set({
+            nombre: nombreInput.value
+          });
+          ocuparPuesto(puestoId);
+        };
+
+        cancelarBtn.onclick = function () {
+          nombreInput.value = '';
+          firebase.database().ref('puestos/' + puestoId).remove();
+          ocuparPuesto(puestoId);
+        };
+
       } else {
-        // El puesto está ocupado, guardar nombre y liberar
-        localStorage.setItem('nombre' + puestoId, nombreInput.value);
+        firebase.database().ref('puestos/' + puestoId).set({
+          nombre: nombreInput.value
+        });
         ocuparPuesto(puestoId);
       }
 
-      // Habilitar el botón de guardar solo si hay un cambio en el nombre
       nombreInput.addEventListener('input', function () {
         guardarBtn.disabled = (nombreInput.value.trim() === '');
       });
-
-      // Al hacer clic en el botón de guardar
-      guardarBtn.onclick = function () {
-        localStorage.setItem('nombre' + puestoId, nombreInput.value);
-        ocuparPuesto(puestoId);
-      };
-
-      // Al hacer clic en el botón de cancelar
-      cancelarBtn.onclick = function () {
-        nombreInput.value = '';
-        localStorage.removeItem('nombre' + puestoId);
-        ocuparPuesto(puestoId);
-      };
     }
 
     function ocuparPuesto(puestoId) {
@@ -109,19 +123,17 @@
       var guardarBtn = document.getElementById('guardar' + puestoId);
       var cancelarBtn = document.getElementById('cancelar' + puestoId);
 
-      // Verificar si el nombre está presente
       if (nombreInput.value.trim() !== '') {
         estadoPuesto.textContent = 'Ocupado';
         estadoPuesto.classList.add('ocupado');
         nombreInput.setAttribute('readonly', true);
-        guardarBtn.style.display = 'none'; // Ocultar el botón de guardar después de la ocupación
-        cancelarBtn.style.display = 'none'; // Ocultar el botón de cancelar después de la ocupación
+        guardarBtn.style.display = 'none';
+        cancelarBtn.style.display = 'none';
       } else {
-        // Si no hay nombre, el puesto se marca como disponible
         estadoPuesto.textContent = 'Disponible';
         estadoPuesto.classList.remove('ocupado');
-        guardarBtn.style.display = 'none'; // Ocultar el botón de guardar si está disponible
-        cancelarBtn.style.display = 'none'; // Ocultar el botón de cancelar si está disponible
+        guardarBtn.style.display = 'none';
+        cancelarBtn.style.display = 'none';
       }
     }
   </script>
