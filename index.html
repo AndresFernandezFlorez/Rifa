@@ -27,6 +27,11 @@
     .nombre-input {
       margin-top: 5px;
     }
+    @media (max-width: 576px) {
+      .puesto {
+        margin: 5px 0;
+      }
+    }
   </style>
   <title>Rifa</title>
 </head>
@@ -41,12 +46,12 @@
 
   <script>
     var firebaseConfig = {
-      apiKey: "AIzaSyC2J11P7rk8NnWoh0HyRdo56QK2zZgnXyA",
-      authDomain: "rifa-3af3a.firebaseapp.com",
-      projectId: "rifa-3af3a",
-      storageBucket: "rifa-3af3a.appspot.com",
-      messagingSenderId: "828130234957",
-      appId: "1:828130234957:web:93904c2209f0f83fc70204"
+      apiKey: "tu-api-key",
+      authDomain: "tu-auth-domain",
+      projectId: "tu-project-id",
+      storageBucket: "tu-storage-bucket",
+      messagingSenderId: "tu-messaging-sender-id",
+      appId: "tu-app-id"
     };
 
     // Inicializar Firebase
@@ -68,7 +73,7 @@
 
     for (var i = 1; i <= 100; i++) {
       var puestoDiv = document.createElement('div');
-      puestoDiv.className = 'col-md-3 puesto';
+      puestoDiv.className = 'col-md-3 col-sm-6 puesto';
       puestoDiv.id = 'puesto' + i;
       puestoDiv.innerHTML = '<p>Puesto ' + i + '</p><p class="estado" id="estado' + i + '">Disponible</p><input type="text" class="form-control nombre-input" id="nombre' + i + '" placeholder="Nombre" style="display:none;"><button class="btn btn-primary btn-sm" id="guardar' + i + '" style="display:none;">Guardar</button><button class="btn btn-danger btn-sm" id="cancelar' + i + '" style="display:none;">Cancelar</button>';
       puestoDiv.onclick = function () {
